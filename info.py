@@ -27,9 +27,9 @@ BOT_USERNAME = environ.get("BOT_USERNAME", '')  # Bot's username
 
 # 🔗 Channel & Support Links
 CHANNEL = environ.get('CHANNEL', '')  # Updates channel
-SUPPORT = environ.get('SUPPORT', '')  # Support group
-HOW_TO_VERIFY = environ.get('HOW_TO_VERIFY', '')  # Verification guide link
-HOW_TO_OPEN = environ.get('HOW_TO_OPEN', '')  # File access guide link
+SUPPORT = environ.get('SUPPORT', 't.me')  # Support group
+HOW_TO_VERIFY = environ.get('HOW_TO_VERIFY', 't.me')  # Verification guide link
+HOW_TO_OPEN = environ.get('HOW_TO_OPEN', 't.me')  # File access guide link
 
 # ✅ Feature Toggles (True/False)
 VERIFY = environ.get("VERIFY", False)  # Enable user verification
@@ -43,15 +43,15 @@ PUBLIC_FILE_STORE = environ.get('PUBLIC_FILE_STORE', True)  # Public or private 
 BATCH_PROTECT_CONTENT = environ.get('BATCH_PROTECT_CONTENT', False)  # Batch file protection
 
 # 🔗 Shortlink Configuration
-SHORTLINK_URL = environ.get('SHORTLINK_URL', '')  # Shortener site
-SHORTLINK_API = environ.get('SHORTLINK_API', '')  # API key for shortlink
+SHORTLINK_URL = environ.get('SHORTLINK_URL', 'earn.com')  # Shortener site
+SHORTLINK_API = environ.get('SHORTLINK_API', 'abcd12245')  # API key for shortlink
 
 # 💾 MongoDB Connection Information
 DB_URL = environ.get('DATABASE_URI', "")  # MongoDB connection URI
 DB_NAME = environ.get('DATABASE_NAME', "cluster0")  # MongoDB database name
 
 # 📸 all Media (Images)
-QR_CODE = environ.get('QR_CODE', '')  # QR Code image
+QR_CODE = environ.get('QR_CODE', 't.me')  # QR Code image
 VERIFY_IMG = environ.get("VERIFY_IMG", "https://graph.org/file/1669ab9af68eaa62c3ca4.jpg")  # Verify success image
 AUTH_PICS = environ.get('AUTH_PICS', 'https://envs.sh/AwV.jpg')  # Auth step image
 PICS = environ.get('PICS', 'https://envs.sh/_pM.jpg')  # Default info image
