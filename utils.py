@@ -132,14 +132,20 @@ async def get_shortlink(link):
 async def check_token(bot, userid, token):
     user = await bot.get_users(userid)
     tokens = temp.TOKENS.get(user.id, {})
-    return tokens.get(token) == False
+    # Returns True if token exists and is verified (True), False otherwise
+    return tokens.get(token) == True
 
 # -------------------------- TOKEN GENERATOR -------------------------- #
 # User को verify करने के लिए एक unique token generate करता है और short link देता है
 async def get_token(bot, userid, link):
     user = await bot.get_users(userid)
     token = ''.join(random.choices(string.ascii_letters + string.digits, k=7))
-    temp.TOKENS[user.id] = {token: False}
+    
+    # Don't overwrite existing tokens - add to the dictionary
+    if user.id not in temp.TOKENS:
+        temp.TOKENS[user.id] = {}
+    temp.TOKENS[user.id][token] = False
+    
     full_link = f"{link}verify-{user.id}-{token}"
     short_link = await get_verify_shorted_link(full_link)
     return short_link
@@ -150,13 +156,16 @@ async def get_verify_status(userid):
     status = temp.VERIFIED.get(userid)
     if not status:
         status = await db.get_verified(userid)
-        temp.VERIFIED[userid] = status
+        if status:  # Only cache if status exists
+            temp.VERIFIED[userid] = status
     return status
 
 # -------------------------- UPDATE VERIFICATION STATUS -------------------------- #
 # User के verification expiry को update करता है
 async def update_verify_status(userid, date_temp, time_temp):
     status = await get_verify_status(userid)
+    if not status:
+        status = {}
     status["date"] = date_temp
     status["time"] = time_temp
     temp.VERIFIED[userid] = status
@@ -166,7 +175,11 @@ async def update_verify_status(userid, date_temp, time_temp):
 # User को verify करता है और उसकी expiry date सेट करता है
 async def verify_user(bot, userid, token):
     user = await bot.get_users(int(userid))
-    temp.TOKENS[user.id] = {token: True}
+    
+    # Mark token as verified
+    if user.id in temp.TOKENS and token in temp.TOKENS[user.id]:
+        temp.TOKENS[user.id][token] = True
+    
     tz = pytz.timezone('Asia/Kolkata')
     expiry = datetime.now(tz) + timedelta(seconds=VERIFY_EXPIRE)
     date_str = expiry.strftime("%Y-%m-%d")
@@ -179,17 +192,25 @@ async def check_verification(bot, userid):
     user = await bot.get_users(int(userid))
     tz = pytz.timezone("Asia/Kolkata")
     now = datetime.now(tz)
-    current_time = time(now.hour, now.minute, now.second)
-    today = date.today()
+    
     status = await get_verify_status(user.id)
     if not status:
         return False
+    
     try:
-        exp_date = datetime.strptime(status["date"], "%Y-%m-%d").date()
-        exp_time = datetime.strptime(status["time"], "%H:%M:%S").time()
+        # Combine date and time into a single datetime object
+        exp_datetime_str = f"{status['date']} {status['time']}"
+        exp_datetime = datetime.strptime(exp_datetime_str, "%Y-%m-%d %H:%M:%S")
+        
+        # Make expiration datetime timezone-aware (localize to IST)
+        exp_datetime = tz.localize(exp_datetime)
+        
     except Exception as e:
         logger.error(f"Invalid verification time format: {e}")
         return False
-    if exp_date < today or (exp_date == today and exp_time < current_time):
+    
+    # Check if verification has expired
+    if exp_datetime < now:
         return False
+    
     return True
