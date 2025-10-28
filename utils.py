@@ -179,25 +179,17 @@ async def check_verification(bot, userid):
     user = await bot.get_users(int(userid))
     tz = pytz.timezone("Asia/Kolkata")
     now = datetime.now(tz)
-    
+    current_time = time(now.hour, now.minute, now.second)
+    today = date.today()
     status = await get_verify_status(user.id)
     if not status:
         return False
-    
     try:
-        # Combine date and time into a single datetime object
-        exp_datetime_str = f"{status['date']} {status['time']}"
-        exp_datetime = datetime.strptime(exp_datetime_str, "%Y-%m-%d %H:%M:%S")
-        
-        # Make expiration datetime timezone-aware (localize to IST)
-        exp_datetime = tz.localize(exp_datetime)
-        
+        exp_date = datetime.strptime(status["date"], "%Y-%m-%d").date()
+        exp_time = datetime.strptime(status["time"], "%H:%M:%S").time()
     except Exception as e:
         logger.error(f"Invalid verification time format: {e}")
         return False
-    
-    # Simple comparison of timezone-aware datetimes
-    if exp_datetime < now:
+    if exp_date < today or (exp_date == today and exp_time < current_time):
         return False
-    
     return True
