@@ -27,7 +27,7 @@ BOT_USERNAME = environ.get("BOT_USERNAME", '')  # Bot's username
 
 # 🔗 Channel & Support Links
 CHANNEL = environ.get('CHANNEL', '')  # Updates channel
-SUPPORT = environ.get('SUPPORT', 't.me')  # Support group
+SUPPORT = environ.get('SUPPORT', '')  # Support group
 HOW_TO_VERIFY = environ.get('HOW_TO_VERIFY', 't.me')  # Verification guide link
 HOW_TO_OPEN = environ.get('HOW_TO_OPEN', 't.me')  # File access guide link
 
