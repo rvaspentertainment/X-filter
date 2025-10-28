@@ -209,7 +209,7 @@ async def check_verification(bot, userid):
         logger.error(f"Invalid verification time format: {e}")
         return False
     
-    # Check if verification has expired
+    # Simple comparison of timezone-aware datetimes
     if exp_datetime < now:
         return False
     
