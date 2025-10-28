@@ -20,32 +20,79 @@ BATCH_FILES = {}
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
-    user_id = message.from_user.id
-    mention = message.from_user.mention
-    me2 = (await client.get_me()).mention
-    if FSUB:
-        if not await is_user_joined(client, message):
+    try:
+        user_id = message.from_user.id
+        mention = message.from_user.mention
+        me2 = (await client.get_me()).mention
+        
+        # Check force subscription
+        if FSUB:
+            try:
+                if not await is_user_joined(client, message):
+                    return
+            except Exception as e:
+                logger.error(f"Error checking user subscription: {e}")
+                await message.reply_text("❌ Error checking subscription status. Please try again later.")
+                return
+        
+        # Add user to database if not exists
+        try:
+            if not await db.is_user_exist(user_id):
+                await db.add_user(user_id, message.from_user.first_name)
+                try:
+                    await client.send_message(LOG_CHANNEL, script.LOG_TEXT.format(me2, user_id, mention))
+                except Exception as log_error:
+                    logger.error(f"Failed to send log message: {log_error}")
+        except Exception as db_error:
+            logger.error(f"Database error for user {user_id}: {db_error}")
+            # Continue execution even if DB fails
+        
+        # Handle start command
+        if len(message.command) == 1 or message.command[1] == "start":
+            try:
+                buttons = [[
+                    InlineKeyboardButton('• ᴜᴘᴅᴀᴛᴇᴅ •', url=CHANNEL),
+                    InlineKeyboardButton('• sᴜᴘᴘᴏʀᴛ •', url=SUPPORT)
+                ], [
+                    InlineKeyboardButton('• ʜᴇʟᴘ •', callback_data='help'),
+                    InlineKeyboardButton('• ᴀʙᴏᴜᴛ •', callback_data='about')
+                ], [
+                    InlineKeyboardButton('✨ ʙᴜʏ ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ : ʀᴇᴍᴏᴠᴇ ᴀᴅꜱ ✨', callback_data="premium_info")
+                ]]
+                reply_markup = InlineKeyboardMarkup(buttons)
+                
+                await message.reply_photo(
+                    photo=PICS,
+                    caption=script.START_TXT.format(message.from_user.mention, BOT_USERNAME),
+                    reply_markup=reply_markup
+                )
+            except Exception as reply_error:
+                logger.error(f"Error sending start message: {reply_error}")
+                # Fallback to text-only message if photo fails
+                try:
+                    await message.reply_text(
+                        text=script.START_TXT.format(message.from_user.mention, BOT_USERNAME),
+                        reply_markup=reply_markup
+                    )
+                except Exception as fallback_error:
+                    logger.error(f"Fallback message also failed: {fallback_error}")
+                    await message.reply_text("❌ An error occurred. Please try again later.")
             return
-    if not await db.is_user_exist(user_id):
-        await db.add_user(user_id, message.from_user.first_name)
-        await client.send_message(LOG_CHANNEL, script.LOG_TEXT.format(me2, user_id, mention))
-    if len(message.command) == 1 or message.command[1] == "start":
-        buttons = [[
-            InlineKeyboardButton('• ᴜᴘᴅᴀᴛᴇᴅ •', url=CHANNEL),
-            InlineKeyboardButton('• sᴜᴘᴘᴏʀᴛ •', url=SUPPORT)
-        ], [
-            InlineKeyboardButton('• ʜᴇʟᴘ •', callback_data='help'),
-            InlineKeyboardButton('• ᴀʙᴏᴜᴛ •', callback_data='about')
-        ],[
-            InlineKeyboardButton('✨ ʙᴜʏ ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ : ʀᴇᴍᴏᴠᴇ ᴀᴅꜱ ✨', callback_data="premium_info")
-        ]]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await message.reply_photo(
-            photo=PICS,
-            caption=script.START_TXT.format(message.from_user.mention, BOT_USERNAME),
-            reply_markup=reply_markup
-        )
-        return
+    
+    except AttributeError as attr_error:
+        logger.error(f"Attribute error in start command: {attr_error}")
+        try:
+            await message.reply_text("❌ Invalid message format. Please try again.")
+        except:
+            pass
+    
+    except Exception as e:
+        logger.error(f"Unexpected error in start command: {e}")
+        logger.error(traceback.format_exc())
+        try:
+            await message.reply_text("❌ An unexpected error occurred. Please contact support. {e}")
+        except:
+            pass
 
     # ✅ Handle /start file_<id>
     msg = message.command[1]
