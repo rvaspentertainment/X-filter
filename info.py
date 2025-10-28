@@ -32,10 +32,10 @@ HOW_TO_VERIFY = environ.get('HOW_TO_VERIFY', 't.me')  # Verification guide link
 HOW_TO_OPEN = environ.get('HOW_TO_OPEN', 't.me')  # File access guide link
 
 # ✅ Feature Toggles (True/False)
-VERIFY = environ.get("VERIFY", False)  # Enable user verification
+VERIFY = environ.get("VERIFY", True)  # Enable user verification
 FSUB = environ.get("FSUB", True)  # Force Subscribe feature
 ENABLE_LIMIT = environ.get("ENABLE_LIMIT", True)  # Enable file limits
-BATCH_VERIFY = environ.get("BATCH_VERIFY", False)  # Verify files in batch
+BATCH_VERIFY = environ.get("BATCH_VERIFY", True)  # Verify files in batch
 IS_SHORTLINK = bool(environ.get('IS_SHORTLINK', False))  # Enable channel shortlink creation
 MAINTENANCE_MODE = environ.get("MAINTENANCE_MODE", False)  # Put bot in maintenance
 PROTECT_CONTENT = environ.get('PROTECT_CONTENT', False)  # Enable content protection
@@ -66,7 +66,7 @@ CHANNEL_FILE_CAPTION = environ.get('CHANNEL_FILE_CAPTION', f"{script.CAPTION}") 
 PING_INTERVAL = int(environ.get("PING_INTERVAL", "1200"))  # Ping interval in seconds (20 minutes)
 SLEEP_THRESHOLD = int(getenv('SLEEP_THRESHOLD', '60'))  # Threshold for sleep delay
 RATE_LIMIT_TIMEOUT = int(environ.get("RATE_LIMIT_TIMEOUT", "600"))  # Rate limit time (10 mins)
-MAX_FILES = int(environ.get("MAX_FILES", "5"))  # Max files allowed per user
+MAX_FILES = int(environ.get("MAX_FILES", "25"))  # Max files allowed per user
 VERIFY_EXPIRE = int(environ.get('VERIFY_EXPIRE', 2))  # Time (in hours) after which verification expires
 
 # ⚙️ Worker Configuration
